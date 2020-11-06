@@ -4,8 +4,22 @@ pipeline {
         password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'Enter a password')
     }
     stages {
-        stage ('Deploy') {
-            steps {
+		stage ('Clone') {
+			steps {
+				sh '''
+                    if [ ! -d "integration-tests" ]
+                    then
+                        mkdir integration-tests
+                    else 
+                        ls -a
+                    fi
+                '''
+                dir('integration-tests') {
+                    git branch: 'master',
+                        credentialsId: 'git_creds',
+                        url: 'https://github.com/tanoker/poc-it-tests'
+				}
+			
                 sh '''
                     if [ ! -d "system-api-one" ]
                     then
@@ -18,12 +32,8 @@ pipeline {
                     git branch: 'master',
                         credentialsId: 'git_creds',
                         url: 'https://github.com/tanoker/poc-it-system-api-one'
-                    
-                    sh '''
-                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
-                        '''
-                }
-                
+				}
+			
                 sh '''
                     if [ ! -d "system-api-two" ]
                     then
@@ -36,12 +46,8 @@ pipeline {
                     git branch: 'master',
                         credentialsId: 'git_creds',
                         url: 'https://github.com/tanoker/poc-it-system-api-two'
-                    
-                    sh '''
-                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
-                        '''
-                }
-
+				}
+			
                 sh '''
                     if [ ! -d "process-api" ]
                     then
@@ -54,7 +60,24 @@ pipeline {
                     git branch: 'master',
                         credentialsId: 'git_creds',
                         url: 'https://github.com/tanoker/poc-it-process-api'
-                    
+				}
+			}
+		}
+        stage ('Deploy') {
+            steps {
+                dir('system-api-one') {
+                    sh '''
+                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
+                        '''
+                }
+                
+                dir('system-api-two') {                    
+                    sh '''
+                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
+                        '''
+                }
+
+                dir('process-api') {                    
                     sh '''
                           mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
                         '''
@@ -64,18 +87,7 @@ pipeline {
 		
 		stage ('Test') {
 			steps {
-                sh '''
-                    if [ ! -d "integration-tests" ]
-                    then
-                        mkdir integration-tests
-                    else 
-                        ls -a
-                    fi
-                '''
                 dir('integration-tests') {
-                    git branch: 'master',
-                        credentialsId: 'git_creds',
-                        url: 'https://github.com/tanoker/poc-it-tests'
 					sh '''
 						  mvn test
 						'''
