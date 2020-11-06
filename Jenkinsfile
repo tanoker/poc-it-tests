@@ -1,10 +1,11 @@
 pipeline {
     agent any
+    parameters {
+        password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'Enter a password')
+    }
     stages {
         stage ('Deploy') {
             steps {
-				
-				//Deploy first System API
                 sh '''
                     if [ ! -d "system-api-one" ]
                     then
@@ -19,11 +20,10 @@ pipeline {
                         url: 'https://github.com/tanoker/poc-it-system-api-one'
                     
                     sh '''
-                          mvn deploy -DmuleDeploy -Dpassword=Andreykrasava1
+                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
                         '''
                 }
                 
-				//Deploy second System API
                 sh '''
                     if [ ! -d "system-api-two" ]
                     then
@@ -38,11 +38,10 @@ pipeline {
                         url: 'https://github.com/tanoker/poc-it-system-api-two'
                     
                     sh '''
-                          mvn deploy -DmuleDeploy -Dpassword=Andreykrasava1
+                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
                         '''
                 }
 
-				//Deploy Process API
                 sh '''
                     if [ ! -d "process-api" ]
                     then
@@ -57,7 +56,7 @@ pipeline {
                         url: 'https://github.com/tanoker/poc-it-process-api'
                     
                     sh '''
-                          mvn deploy -DmuleDeploy -Dpassword=Andreykrasava1
+                          mvn deploy -DmuleDeploy -Dpassword=${PASSWORD}
                         '''
 				}
             }
@@ -83,27 +82,27 @@ pipeline {
                 }
 			}
 		}
-		
-        stage ('Undeploy') {
-            steps {
-                dir('system-api-one') {
-                    sh '''
-                          mvn mule:undeploy -Dmule.artifact=target/*.jar -DmuleDeploy -Dpassword=Andreykrasava1
-                        '''
-                }
-                
-                dir('system-api-two') {
-                    sh '''
-                          mvn mule:undeploy -Dmule.artifact=target/*.jar -DmuleDeploy -Dpassword=Andreykrasava1
-                        '''
-                }
-    
-                dir('process-api') {
-                    sh '''
-                          mvn mule:undeploy -Dmule.artifact=target/*.jar -DmuleDeploy -Dpassword=Andreykrasava1
-                        '''
-                }
-            }
-        }
+	}
+
+	post {
+		always {
+			dir('system-api-one') {
+				sh '''
+					  mvn mule:undeploy -Dmule.artifact=target/*.jar -DmuleDeploy -Dpassword=${PASSWORD}
+					'''
+			}
+			
+			dir('system-api-two') {
+				sh '''
+					  mvn mule:undeploy -Dmule.artifact=target/*.jar -DmuleDeploy -Dpassword=${PASSWORD}
+					'''
+			}
+
+			dir('process-api') {
+				sh '''
+					  mvn mule:undeploy -Dmule.artifact=target/*.jar -DmuleDeploy -Dpassword=${PASSWORD}
+					'''
+			}
+		}
 	}
 }
