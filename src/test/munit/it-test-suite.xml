@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<http:request method="GET" doc:name="Request" doc:id="dbd4ac57-712f-4cd4-91a9-0a347507fa6f" url="http://poc-it-system-api-two.us-e1.cloudhub.io/users"/>
 		</munit:execution>
 		<munit:validation >
-			<munit-tools:assert-that doc:name="Assert that" doc:id="96c58e64-f67c-4079-871d-5255553ec0fe" is="#[MunitTools::equalTo(6)]" expression="#[payload.count]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="96c58e64-f67c-4079-871d-5255553ec0fe" is="#[MunitTools::equalTo(3)]" expression="#[payload.count]"/>
 		</munit:validation>
 	</munit:test>
 
